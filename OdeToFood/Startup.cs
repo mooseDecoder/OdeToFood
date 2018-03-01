@@ -6,8 +6,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using OdeToFood.Data;
 using OdeToFood.Services;
 
 namespace OdeToFood
@@ -15,6 +17,13 @@ namespace OdeToFood
     //purpose of Startup class is so you can reigster your custom services so .net core can use
     public class Startup
     {
+        private IConfiguration _configuration;
+
+        public Startup(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
@@ -24,7 +33,11 @@ namespace OdeToFood
 
             //This basically says: When someone asks for service that implements IGreeter, use an instance of the Greeter class.
             services.AddSingleton<IGreeter, Greeter>();
-            services.AddSingleton<IRestaurantData, InMemoryRestaurantData>();
+            //note we can get the conneciton string via _configuration which we injected in the ctor. The appsettings.json file under ConnectionStrings
+            //will hold anything we put there as accessible here - in this case, 'ConnectionStrings': {'OdeToFood': ....
+            services.AddDbContext<OdeToFoodDbContext>(options => options.UseSqlServer(_configuration.GetConnectionString("OdeToFood")));
+            //having a DbContext as  sSingleton is not thread safe so use Scoped.
+            services.AddScoped<IRestaurantData, SqlRestaurantData>();
             services.AddMvc();
 
         }

@@ -24,7 +24,7 @@ namespace OdeToFood
 
             //This basically says: When someone asks for service that implements IGreeter, use an instance of the Greeter class.
             services.AddSingleton<IGreeter, Greeter>();
-            services.AddScoped<IRestaurantData, InMemoryRestaurantData>();
+            services.AddSingleton<IRestaurantData, InMemoryRestaurantData>();
             services.AddMvc();
 
         }

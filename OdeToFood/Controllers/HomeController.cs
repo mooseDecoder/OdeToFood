@@ -40,9 +40,35 @@ namespace OdeToFood.Controllers
 
             return View(model);
         }
+        [HttpGet]
         public IActionResult Create()
         {
             return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(Restaurant model)
+        {
+            //ModelState holds information including that info it gets from validation from the ResturantEditModel.
+            //So if the ModelState is not valid, a View() is returned but the ModelState will also show
+            // the validation information triggered from the annotations.
+            if (ModelState.IsValid)
+            {
+                var newRestaurant = new Restaurant();
+                newRestaurant.Name = model.Name;
+                newRestaurant.Cuisine = model.Cuisine;
+
+                newRestaurant = _restaurantData.Add(newRestaurant);
+
+                //return View("Details", newRestaurant);
+                //instead of just returning the view in the post, you will need to redirect to a new get request for the details view.
+                //Otherwiese if the user refreshes the page they'll end up posting twice.
+                return RedirectToAction(nameof(Details), new { id = newRestaurant.Id });
+            }
+            else
+            {
+                return View();
+            }
         }
     }
 }
